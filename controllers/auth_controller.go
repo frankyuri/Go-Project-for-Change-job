@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
+	"go-train/database"
 	"go-train/models"
 	"go-train/repositories"
 	"go-train/utils"
@@ -9,6 +10,11 @@ import (
 	"net/http"
 	"strings"
 )
+
+type ChangePasswordRequest struct {
+	OldPassword string `json:"old_password" binding:"required"`
+	NewPassword string `json:"new_password" binding:"required,min=6"`
+}
 
 // RegisterUser 處理用戶註冊
 func RegisterUser(c *gin.Context) {
@@ -94,5 +100,65 @@ func LoginUser(c *gin.Context) {
 			"email":    user.Email,
 		},
 	}))
+
+}
+
+func ChangePassword(c *gin.Context) {
+	var req ChangePasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "無效的數據請求",
+		})
+		return
+	}
+
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "未授權",
+		})
+		return
+	}
+
+	// 獲取用戶數據
+	var user models.User
+	result := database.DB.First(&user, userID)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "找不到用戶",
+		})
+		return
+	}
+
+	// 驗證舊密碼
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.OldPassword))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "舊密碼不正確",
+		})
+		return
+	}
+
+	// 加密新密碼
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "密碼加密失敗",
+		})
+		return
+	}
+
+	// 更新密碼
+	user.Password = string(hashedPassword)
+	if err := database.DB.Save(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "更新密碼失敗",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "密碼已成功更新",
+	})
 
 }
