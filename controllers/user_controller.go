@@ -20,7 +20,7 @@ func CreateUser(c *gin.Context) {
 
 	// 改進的請求體綁定和驗證
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, utils.ErrorResponse(http.StatusBadRequest, "無效的請求數據: " + err.Error()))
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse(http.StatusBadRequest, "無效的請求數據: "+err.Error()))
 		return
 	}
 
@@ -47,7 +47,7 @@ func CreateUser(c *gin.Context) {
 // 根據ID獲取單個用戶
 func GetUserByID(c *gin.Context) {
 	idx := c.Param("id")
-	id , err := strconv.Atoi(idx)
+	id, err := strconv.Atoi(idx)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(http.StatusBadRequest, "無效的ID格式"))
@@ -107,12 +107,12 @@ func GetUsers(c *gin.Context) {
 		"users": users,
 		"meta": map[string]interface{}{
 			"total_count": totalCount,
-			"page": page,
-			"page_size": pageSize,
+			"page":        page,
+			"page_size":   pageSize,
 			"total_pages": int(math.Ceil(float64(totalCount) / float64(pageSize))),
 		},
 	}
-	
+
 	c.JSON(http.StatusOK, utils.SuccessResponse(http.StatusOK, "成功獲取所有用戶", response))
 
 }
@@ -136,7 +136,7 @@ func GetUsers(c *gin.Context) {
 // // DeleteUser 刪除用戶
 func DeleteUser(c *gin.Context) {
 	id := c.Param("id")
-	idx , err := strconv.Atoi(id)
+	idx, err := strconv.Atoi(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse(http.StatusBadRequest, "無效的ID格式"))
 		return
@@ -152,7 +152,6 @@ func DeleteUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(http.StatusInternalServerError, "無法刪除用戶"))
 		return
 	}
-
 
 	c.JSON(http.StatusOK, utils.SuccessResponse(http.StatusOK, "成功刪除用戶", nil))
 }
