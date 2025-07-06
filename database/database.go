@@ -4,6 +4,8 @@ package database
 import (
 	"fmt"
 	"go-train/models"
+	"gorm.io/gorm/logger"
+	"log"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -14,12 +16,12 @@ import (
 var DB *gorm.DB
 
 func ConnectDB() {
+	var err error
 	// 加载.env文件（如果使用）
 	if err := godotenv.Load(); err != nil {
 		panic("Failed to load .env file")
 	}
-
-    // 從環境變量讀取配置
+	// 從環境變量讀取配置
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		os.Getenv("DB_HOST"),
@@ -30,18 +32,25 @@ func ConnectDB() {
 		os.Getenv("DB_SSLMODE"),
 	)
 	// 先連接數據庫
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-    if err != nil {
-        panic(fmt.Sprintf("Failed to connect to database: %v", err))
-    }
-    
-	DB = db
-	
-	if err:= DB.AutoMigrate(&models.User{}); err != nil {
-		panic("Failed to migrate database")
+	// 連接數據庫
+	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
+	if err != nil {
+		log.Fatal("Failed to connect to database: ", err)
 	}
 
+	//// 刪除現有的表（如果存在）
+	//err = DB.Migrator().DropTable(&models.User{})
+	//if err != nil {
+	//	log.Fatal("Failed to drop table: ", err)
+	//}
 
-	
-	fmt.Println("Database connected!")
+	// 創建新的表
+	err = DB.AutoMigrate(&models.User{})
+	if err != nil {
+		log.Fatal("Failed to migrate database: ", err)
+	}
+
+	log.Println("Database migration completed successfully")
 }
