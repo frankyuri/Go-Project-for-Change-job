@@ -1,17 +1,15 @@
 package controllers
 
 import (
-	"errors"
+	"go-train/database"
 	"go-train/models"
 	"go-train/repositories"
 	"go-train/utils"
-	"math"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 // 創建新用戶
@@ -46,27 +44,22 @@ func CreateUser(c *gin.Context) {
 
 // 根據ID獲取單個用戶
 func GetUserByID(c *gin.Context) {
-	idx := c.Param("id")
-	id, err := strconv.Atoi(idx)
+	var user models.User
+	id := c.Param("id")
 
-	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.ErrorResponse(http.StatusBadRequest, "無效的ID格式"))
+	if err := database.DB.First(&user, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "找不到用戶",
+		})
 		return
 	}
 
-	user, err := repositories.GetUserByID(id)
+	// 使用 DTO 返回數據
+	userResponse := user.ToUserResponse()
+	c.JSON(http.StatusOK, gin.H{
+		"user": userResponse,
+	})
 
-	if err != nil {
-		// 區分不同錯誤類型
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, utils.ErrorResponse(http.StatusNotFound, "用戶不存在"))
-		} else {
-			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(http.StatusInternalServerError, "查詢用戶失敗"))
-		}
-		return
-	}
-
-	c.JSON(http.StatusOK, utils.SuccessResponse(http.StatusOK, "成功獲取用戶", user))
 }
 
 func Ping(c *gin.Context) {
@@ -75,45 +68,23 @@ func Ping(c *gin.Context) {
 
 // 獲取所有用戶
 func GetUsers(c *gin.Context) {
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
-
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 || pageSize > 100 {
-		pageSize = 10
-	}
-
-	sortBy := c.DefaultQuery("sort_by", "id")
-	sortOrder := c.DefaultQuery("sort_order", "asc")
-
 	var users []models.User
-	users, totalCount, err := repositories.GetUsers(page, pageSize, sortBy, sortOrder)
-
-	if err != nil {
-		c.JSON(http.StatusNotFound, utils.ErrorResponse(http.StatusInternalServerError, "獲取用戶列表失敗"))
+	if err := database.DB.Find(&users).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "獲取用戶列表失敗",
+		})
 		return
 	}
 
-	// 如果沒有用戶，返回空數組而不是錯誤
-	if len(users) == 0 {
-		c.JSON(http.StatusOK, utils.SuccessResponse(http.StatusOK, "沒有找到用戶", []models.User{}))
-		return
+	// 轉換所有用戶數據為 DTO
+	userResponses := make([]models.UserResponse, len(users))
+	for i, user := range users {
+		userResponses[i] = user.ToUserResponse()
 	}
 
-	// 添加元數據
-	response := map[string]interface{}{
-		"users": users,
-		"meta": map[string]interface{}{
-			"total_count": totalCount,
-			"page":        page,
-			"page_size":   pageSize,
-			"total_pages": int(math.Ceil(float64(totalCount) / float64(pageSize))),
-		},
-	}
-
-	c.JSON(http.StatusOK, utils.SuccessResponse(http.StatusOK, "成功獲取所有用戶", response))
+	c.JSON(http.StatusOK, gin.H{
+		"users": userResponses,
+	})
 
 }
 
