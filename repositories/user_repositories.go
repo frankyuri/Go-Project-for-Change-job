@@ -14,8 +14,21 @@ func CreateUser(user *models.User) error {
 		Columns:   []clause.Column{{Name: "email"}},
 		DoNothing: true,
 	})
+
 	result := database.DB.Create(user)
-	return result.Error
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	// 只有成功後才去計數
+	displayID, err := models.GetNextUserDisplayID(database.DB)
+	if err != nil {
+		return err
+	}
+	// 設定 DisplayID 並更新回 DB
+	user.DisplayID = displayID
+	return database.DB.Model(user).Update("display_id", displayID).Error
 }
 
 func GetUserByID(id int) (models.User, error) {
