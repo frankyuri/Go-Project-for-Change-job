@@ -1,13 +1,11 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin"
+	_ "github.com/mattn/go-sqlite3"
 	"go-train/database"
 	"go-train/middleware"
 	"go-train/routes"
-
-	"github.com/gin-gonic/gin"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {

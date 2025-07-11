@@ -52,7 +52,10 @@ func RegisterUser(c *gin.Context) {
 
 	// 清除返回數據中的密碼
 	user.Password = ""
-	c.JSON(http.StatusCreated, utils.SuccessResponse(http.StatusCreated, "註冊成功", user))
+	userResponse := user.ToUserRegister()
+	c.JSON(http.StatusOK, gin.H{
+		"user": userResponse,
+	})
 
 }
 
