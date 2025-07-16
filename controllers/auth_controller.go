@@ -1,14 +1,15 @@
 package controllers
 
 import (
-	"github.com/gin-gonic/gin"
 	"go-train/database"
 	"go-train/models"
 	"go-train/repositories"
 	"go-train/utils"
-	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type ChangePasswordRequest struct {
@@ -163,5 +164,7 @@ func ChangePassword(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "密碼已成功更新",
 	})
+
+	utils.WriteOperationLog(user.ID, "change_password", "用戶修改了密碼")
 
 }
