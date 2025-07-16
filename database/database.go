@@ -4,9 +4,10 @@ package database
 import (
 	"fmt"
 	"go-train/models"
-	"gorm.io/gorm/logger"
 	"log"
 	"os"
+
+	"gorm.io/gorm/logger"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
@@ -47,7 +48,7 @@ func ConnectDB() {
 	//}
 
 	// 創建新的表
-	err = DB.AutoMigrate(&models.User{}, &models.Counter{})
+	err = DB.AutoMigrate(&models.User{}, &models.Counter{}, &models.OperationLog{})
 	if err != nil {
 		log.Fatal("Failed to migrate database: ", err)
 	}

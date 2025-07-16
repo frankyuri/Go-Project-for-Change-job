@@ -69,7 +69,15 @@ func Ping(c *gin.Context) {
 // 獲取所有用戶
 func GetUsers(c *gin.Context) {
 	var users []models.User
-	if err := database.DB.Find(&users).Error; err != nil {
+	keyword := c.Query("keyword")
+
+	db := database.DB
+	if keyword != "" {
+		like := "%" + keyword + "%"
+		db = db.Where("username ILIKE ? OR email ILIKE ?", like, like)
+	}
+
+	if err := db.Find(&users).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "獲取用戶列表失敗",
 		})
@@ -85,7 +93,6 @@ func GetUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"users": userResponses,
 	})
-
 }
 
 // // UpdateUser 更新用戶
