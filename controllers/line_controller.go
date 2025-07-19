@@ -41,7 +41,7 @@ func LineWebhook(c *gin.Context) {
 				todo := models.LineTodo{
 					UserID:  event.Source.UserID,
 					Content: strings.TrimSpace(strings.TrimPrefix(content, "/todo")),
-					Status:  "todo",
+					Status:  models.StatusTodo,
 				}
 				database.DB.Create(&todo)
 				utils.ReplyToUser(event.Source.UserID, "已新增待辦事項: "+todo.Content)
@@ -54,7 +54,7 @@ func LineWebhook(c *gin.Context) {
 				}
 				result := database.DB.Model(&models.LineTodo{}).
 					Where("id = ? AND user_id = ?", id, event.Source.UserID).
-					Update("status", "done")
+					Update("status", models.StatusDone)
 				if result.RowsAffected == 0 {
 					utils.ReplyToUser(event.Source.UserID, "找不到該任務或已完成")
 				} else {
@@ -73,14 +73,20 @@ func LineWebhook(c *gin.Context) {
 					utils.ReplyToUser(event.Source.UserID, "請輸入正確的 id")
 					break
 				}
-				result := database.DB.Model(&models.LineTodo{}).
-					Where("id = ? AND user_id = ?", id, event.Source.UserID).
-					Update("content", newContent)
+				var todo models.LineTodo
+				result := database.DB.Where("id = ? AND user_id = ?", id, event.Source.UserID).First(&todo)
 				if result.RowsAffected == 0 {
 					utils.ReplyToUser(event.Source.UserID, "找不到該任務")
-				} else {
-					utils.ReplyToUser(event.Source.UserID, "已更新內容")
+					break
 				}
+				if todo.Status == models.StatusDone {
+					utils.ReplyToUser(event.Source.UserID, "已完成的任務不能編輯內容")
+					break
+				}
+				result = database.DB.Model(&models.LineTodo{}).
+					Where("id = ? AND user_id = ?", id, event.Source.UserID).
+					Update("content", newContent)
+				utils.ReplyToUser(event.Source.UserID, "已更新內容")
 			case strings.HasPrefix(content, "/show"):
 				now := time.Now()
 				startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
@@ -92,9 +98,9 @@ func LineWebhook(c *gin.Context) {
 				var todoList, doneList []string
 				for _, t := range todos {
 					line := fmt.Sprintf("%d. %s", t.ID, t.Content)
-					if t.Status == "todo" {
+					if t.Status == models.StatusTodo {
 						todoList = append(todoList, line)
-					} else {
+					} else if t.Status == models.StatusDone {
 						doneList = append(doneList, line)
 					}
 				}
