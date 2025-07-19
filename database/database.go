@@ -48,7 +48,7 @@ func ConnectDB() {
 	//}
 
 	// 創建新的表
-	err = DB.AutoMigrate(&models.User{}, &models.Counter{}, &models.OperationLog{})
+	err = DB.AutoMigrate(&models.User{}, &models.Counter{}, &models.OperationLog{} ,&models.LineTodo{})
 	if err != nil {
 		log.Fatal("Failed to migrate database: ", err)
 	}
