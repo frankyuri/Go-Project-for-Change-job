@@ -8,9 +8,9 @@ import (
 
 var Bot *linebot.Client
 
-func InitLineBot(channelSecret, channelToken string) error {
+func InitLineBot(channelSecret, apiToken string) error {
 	var err error
-	Bot, err = linebot.New(channelSecret, channelToken)
+	Bot, err = linebot.New(channelSecret, apiToken)
 	return err
 }
 
