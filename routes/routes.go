@@ -8,6 +8,9 @@ import (
 )
 
 func SetupRoutes(r *gin.Engine) {
+
+	//webhook 路由
+	r.POST("/line/webhook", controllers.LineWebhook)
 	// 公開路由
 	auth := r.Group("/auth")
 	{
