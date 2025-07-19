@@ -112,8 +112,11 @@ func LineWebhook(c *gin.Context) {
 				}
 				utils.ReplyToUser(event.Source.UserID, reply)
 			default:
-				utils.ReplyToUser(event.Source.UserID, "未知指令，請輸入 /todo, /done, /edit, /show")
-
+				if strings.HasPrefix(content, "/help") {
+					utils.ReplyHelpFlex(event.Source.UserID)
+				} else {
+					utils.ReplyToUser(event.Source.UserID, "未知指令，請輸入 /help 查看所有指令")
+				}
 			}
 		}
 	}
