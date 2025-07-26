@@ -48,7 +48,16 @@ func ConnectDB() {
 	//}
 
 	// 創建新的表
-	err = DB.AutoMigrate(&models.User{}, &models.Counter{}, &models.OperationLog{} ,&models.LineTodo{})
+	err = DB.AutoMigrate(
+		&models.User{},
+		&models.Counter{},
+		&models.OperationLog{},
+		&models.LineTodo{},
+		&models.Category{},  // 商品分類表
+		&models.Product{},   // 商品表
+		&models.Order{},     // 訂單主檔表
+		&models.OrderItem{}, // 訂單明細表
+	)
 	if err != nil {
 		log.Fatal("Failed to migrate database: ", err)
 	}
