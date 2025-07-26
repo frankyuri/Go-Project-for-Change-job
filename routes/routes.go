@@ -26,6 +26,7 @@ func SetupRoutes(r *gin.Engine) {
 		api.GET("/users/:id", controllers.GetUserByID)
 		api.DELETE("/users/:id", controllers.DeleteUser)
 		api.POST("/change-password", controllers.ChangePassword)
-		// ... 其他需要認證的路由
+		api.POST("/products", controllers.CreateProduct)
+		api.POST("/categories", controllers.CreateCategory)
 	}
 }
