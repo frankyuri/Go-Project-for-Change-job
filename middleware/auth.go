@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"go-train/utils"
 	"net/http"
 	"strings"
@@ -25,8 +26,17 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		claims, err := utils.ValidateToken(parts[1])
+		// Debug: 印出 token 前幾個字元
+		token := parts[1]
+		if len(token) > 10 {
+			fmt.Printf("Token: %s...\n", token[:10])
+		} else {
+			fmt.Printf("Token: %s\n", token)
+		}
+
+		claims, err := utils.ValidateToken(token)
 		if err != nil {
+			fmt.Printf("Token validation error: %v\n", err)
 			c.JSON(http.StatusUnauthorized, utils.ErrorResponse(http.StatusUnauthorized, "無效的令牌"))
 			c.Abort()
 			return
