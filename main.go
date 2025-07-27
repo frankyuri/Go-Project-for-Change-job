@@ -28,13 +28,32 @@ func main() {
 
 	// 初始化 Gin
 	r := gin.Default()
+
+	// 信任代理，讓 Gin 正確處理 X-Forwarded-* headers
+	r.SetTrustedProxies([]string{"0.0.0.0/0"})
+
+	// 加入 CORS 中間件
+	r.Use(func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "*")
+		c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers")
+		c.Header("Access-Control-Allow-Credentials", "true")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	})
 	r.Use(middleware.Logger())
 	routes.SetupRoutes(r)
 
 	// 建立 context
 	ctx := context.Background()
 	tun, err := ngrok.Listen(ctx,
-		config.HTTPEndpoint(config.WithDomain("")), // 留空自動分配免費 ngrok domain
+		config.HTTPEndpoint(), // 使用預設 HTTP endpoint，ngrok 會自動處理 HTTPS
 		ngrok.WithAuthtoken(ngrokToken),
 	)
 	if err != nil {
@@ -44,7 +63,7 @@ func main() {
 	log.Println("ngrok public url:", tun.URL())
 	utils.InitLineBot(lineSecret, lineToken)
 	// 啟動伺服器
-	// r.Run(":303")
+	// r.Run(":3030")
 	if err := r.RunListener(tun); err != nil {
 		log.Fatal(err)
 	}
