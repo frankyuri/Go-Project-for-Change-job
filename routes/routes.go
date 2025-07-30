@@ -28,5 +28,13 @@ func SetupRoutes(r *gin.Engine) {
 		api.POST("/change-password", controllers.ChangePassword)
 		api.POST("/products", controllers.CreateProduct)
 		api.POST("/categories", controllers.CreateCategory)
+		api.GET("/products", controllers.GetProducts)
+		api.GET("/products/:id", controllers.GetProductByID)
+		api.PUT("/products/:id", controllers.UpdateProduct)
+		api.DELETE("/products/:id", controllers.DeleteProduct)
+		api.GET("/categories", controllers.GetCategories)
+		api.GET("/categories/:id", controllers.GetCategoryByID)
+		api.PUT("/categories/:id", controllers.UpdateCategory)
+		api.DELETE("/categories/:id", controllers.DeleteCategory)
 	}
 }
