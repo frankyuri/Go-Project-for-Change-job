@@ -1,0 +1,35 @@
+# Go build artifacts
+/bin/
+/build/
+/out/
+/dist/
+*.exe
+*.test
+*.log
+
+# Go modules
+/go.sum
+
+# IDE/editor
+.vscode/
+.idea/
+*.swp
+
+# OS/工具暫存
+.DS_Store
+Thumbs.db
+
+# 環境設定
+.env
+.env.*
+
+# 資料庫
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker
+*.pid
+
+# 測試覆蓋率
+coverage.out
