@@ -1,4 +1,8 @@
-package models
+package dto
+
+import (
+	"go-train/models"
+)
 
 type UserResponse struct {
 	ID        uint   `json:"id"`
@@ -15,7 +19,7 @@ type UserRegisterResponse struct {
 }
 
 // 添加一個轉換方法
-func (u *User) ToUserResponse() UserResponse {
+func ToUserResponse(u *models.User) UserResponse {
 	return UserResponse{
 		ID:        u.DisplayID,
 		Username:  u.Username,
@@ -25,7 +29,7 @@ func (u *User) ToUserResponse() UserResponse {
 	}
 }
 
-func (u *User) ToUserRegister() UserRegisterResponse {
+func ToUserRegisterResponse(u *models.User) UserRegisterResponse {
 	return UserRegisterResponse{
 		ID:       u.DisplayID,
 		Username: u.Username,

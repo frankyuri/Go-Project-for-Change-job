@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"go-train/database"
+	"go-train/dto"
 	"go-train/models"
 	"go-train/repositories"
 	"go-train/utils"
@@ -55,7 +56,7 @@ func GetUserByID(c *gin.Context) {
 	}
 
 	// 使用 DTO 返回數據
-	userResponse := user.ToUserResponse()
+	userResponse := dto.ToUserResponse(&user)
 	c.JSON(http.StatusOK, gin.H{
 		"user": userResponse,
 	})
@@ -85,9 +86,9 @@ func GetUsers(c *gin.Context) {
 	}
 
 	// 轉換所有用戶數據為 DTO
-	userResponses := make([]models.UserResponse, len(users))
+	userResponses := make([]dto.UserResponse, len(users))
 	for i, user := range users {
-		userResponses[i] = user.ToUserResponse()
+		userResponses[i] = dto.ToUserResponse(&user)
 	}
 
 	c.JSON(http.StatusOK, gin.H{

@@ -19,7 +19,7 @@ var DB *gorm.DB
 func ConnectDB() {
 	var err error
 	// 加载.env文件（如果使用）
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load("./config/.env"); err != nil {
 		panic("Failed to load .env file")
 	}
 	// 從環境變量讀取配置

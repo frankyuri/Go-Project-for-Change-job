@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"go-train/database"
+	"go-train/dto"
 	"go-train/models"
 	"go-train/repositories"
 	"go-train/utils"
@@ -61,7 +62,7 @@ func RegisterUser(c *gin.Context) {
 
 	// 清除返回數據中的密碼
 	user.Password = ""
-	userResponse := user.ToUserRegister()
+	userResponse := dto.ToUserRegisterResponse(&user)
 	c.JSON(http.StatusOK, gin.H{"user": userResponse})
 
 	utils.WriteOperationLog(
