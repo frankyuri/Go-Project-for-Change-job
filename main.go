@@ -17,7 +17,7 @@ import (
 
 func main() {
 	// 讀取env
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load("./config/.env"); err != nil {
 		log.Println("找不到 .env，將使用系統環境變數")
 	}
 	ngrokToken := os.Getenv("NGROK_AUTHTOKEN")
@@ -28,7 +28,7 @@ func main() {
 
 	// 初始化 Gin
 	r := gin.Default()
-
+	utils.InitRedis()
 	// 信任代理，讓 Gin 正確處理 X-Forwarded-* headers
 	r.SetTrustedProxies([]string{"0.0.0.0/0"})
 
@@ -67,5 +67,4 @@ func main() {
 	if err := r.RunListener(tun); err != nil {
 		log.Fatal(err)
 	}
-
 }
