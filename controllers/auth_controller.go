@@ -20,6 +20,21 @@ type ChangePasswordRequest struct {
 	NewPassword string `json:"new_password" binding:"required,min=6"`
 }
 
+// @Summary      用戶註冊
+// @Description  用戶註冊
+// @Tags         User
+// @Accept       json
+// @Produce      json
+// @Param        user body models.User true "用戶信息"
+// @Success      200 {object} dto.UserRegisterResponse "註冊成功"
+// @Failure      400 {object} utils.ErrorResponse "無效的請求數據"
+// @Failure      409 {object} utils.ErrorResponse "用戶名或郵箱已被使用"
+// @Failure      500 {object} utils.ErrorResponse "註冊失敗"
+// @Router       /api/v1/users/register [post]
+// @Security     ApiKeyAuth
+// @Security     BearerAuth
+// @Security     BasicAuth
+// @Security     OAuth2
 // RegisterUser 處理用戶註冊
 func RegisterUser(c *gin.Context) {
 
@@ -27,19 +42,19 @@ func RegisterUser(c *gin.Context) {
 	start := time.Now()
 
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, utils.ErrorResponse(http.StatusBadRequest, "無效的請求數據"))
+		c.JSON(http.StatusBadRequest, utils.ErrorsResponse(http.StatusBadRequest, "無效的請求數據"))
 		return
 	}
 	//驗證必要欄位
 	if user.Username == "" || user.Password == "" || user.Email == "" {
-		c.JSON(http.StatusBadRequest, utils.ErrorResponse(http.StatusBadRequest, "用戶名、密碼和郵箱都不能為空"))
+		c.JSON(http.StatusBadRequest, utils.ErrorsResponse(http.StatusBadRequest, "用戶名、密碼和郵箱都不能為空"))
 		return
 	}
 
 	//加密密碼
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(http.StatusInternalServerError, "密碼加密失敗"))
+		c.JSON(http.StatusInternalServerError, utils.ErrorsResponse(http.StatusInternalServerError, "密碼加密失敗"))
 		return
 	}
 
@@ -49,10 +64,10 @@ func RegisterUser(c *gin.Context) {
 	if err := repositories.CreateUser(&user); err != nil {
 		if strings.Contains(err.Error(), "unique constraint") || strings.Contains(err.Error(), "duplicate key") {
 			result = "username_or_email_exists"
-			c.JSON(http.StatusConflict, utils.ErrorResponse(http.StatusConflict, "用戶名或郵箱已被使用"))
+			c.JSON(http.StatusConflict, utils.ErrorsResponse(http.StatusConflict, "用戶名或郵箱已被使用"))
 		} else {
 			result = "fail"
-			c.JSON(http.StatusInternalServerError, utils.ErrorResponse(http.StatusInternalServerError, "註冊失敗"))
+			c.JSON(http.StatusInternalServerError, utils.ErrorsResponse(http.StatusInternalServerError, "註冊失敗"))
 		}
 		utils.WriteOperationLog(
 			user.Username, "register", "", "", "", result, c.ClientIP(), "API", "User", "用戶註冊", time.Since(start).Milliseconds(),
@@ -80,14 +95,14 @@ func LoginUser(c *gin.Context) {
 	start := time.Now()
 
 	if err := c.ShouldBindJSON(&loginData); err != nil {
-		c.JSON(http.StatusBadRequest, utils.ErrorResponse(http.StatusBadRequest, "無效的請求數據"))
+		c.JSON(http.StatusBadRequest, utils.ErrorsResponse(http.StatusBadRequest, "無效的請求數據"))
 		return
 	}
 
 	// 從數據庫獲取用戶
 	user, err := repositories.GetUserByUsername(loginData.Username)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, utils.ErrorResponse(http.StatusUnauthorized, "用戶名或密碼錯誤"))
+		c.JSON(http.StatusUnauthorized, utils.ErrorsResponse(http.StatusUnauthorized, "用戶名或密碼錯誤"))
 		utils.WriteOperationLog(
 			loginData.Username, "login", "", "", "", "fail", c.ClientIP(), "API", "User", "用戶登入失敗", time.Since(start).Milliseconds(),
 		)
@@ -97,7 +112,7 @@ func LoginUser(c *gin.Context) {
 	// 驗證密碼
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginData.Password))
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, utils.ErrorResponse(http.StatusUnauthorized, "用戶名或密碼錯誤"))
+		c.JSON(http.StatusUnauthorized, utils.ErrorsResponse(http.StatusUnauthorized, "用戶名或密碼錯誤"))
 		utils.WriteOperationLog(
 			loginData.Username, "login", fmt.Sprintf("%d", user.ID), "", "", "fail", c.ClientIP(), "API", "User", "用戶登入失敗", time.Since(start).Milliseconds(),
 		)
@@ -106,7 +121,7 @@ func LoginUser(c *gin.Context) {
 
 	token, err := utils.GenerateToken(user.ID, user.Username)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(http.StatusInternalServerError, "生成令牌失敗"))
+		c.JSON(http.StatusInternalServerError, utils.ErrorsResponse(http.StatusInternalServerError, "生成令牌失敗"))
 		utils.WriteOperationLog(
 			user.Username, "login", fmt.Sprintf("%d", user.ID), "", "", "fail", c.ClientIP(), "API", "User", "用戶登入失敗", time.Since(start).Milliseconds(),
 		)

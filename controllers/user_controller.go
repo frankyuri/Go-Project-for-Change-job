@@ -19,13 +19,13 @@ func CreateUser(c *gin.Context) {
 
 	// 改進的請求體綁定和驗證
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, utils.ErrorResponse(http.StatusBadRequest, "無效的請求數據: "+err.Error()))
+		c.JSON(http.StatusBadRequest, utils.ErrorsResponse(http.StatusBadRequest, "無效的請求數據: "+err.Error()))
 		return
 	}
 
 	// 基本數據驗證
 	if user.Email == "" {
-		c.JSON(http.StatusBadRequest, utils.ErrorResponse(http.StatusBadRequest, "郵箱不能為空"))
+		c.JSON(http.StatusBadRequest, utils.ErrorsResponse(http.StatusBadRequest, "郵箱不能為空"))
 		return
 	}
 
@@ -33,10 +33,10 @@ func CreateUser(c *gin.Context) {
 	if err := repositories.CreateUser(&user); err != nil {
 		// 檢查特定錯誤類型，例如唯一約束違反
 		if strings.Contains(err.Error(), "unique constraint") || strings.Contains(err.Error(), "duplicate key") {
-			c.JSON(http.StatusConflict, utils.ErrorResponse(http.StatusConflict, "該郵箱已被使用"))
+			c.JSON(http.StatusConflict, utils.ErrorsResponse(http.StatusConflict, "該郵箱已被使用"))
 			return
 		}
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(http.StatusInternalServerError, "創建用戶失敗"))
+		c.JSON(http.StatusInternalServerError, utils.ErrorsResponse(http.StatusInternalServerError, "創建用戶失敗"))
 		return
 	}
 
@@ -117,18 +117,18 @@ func DeleteUser(c *gin.Context) {
 	id := c.Param("id")
 	idx, err := strconv.Atoi(id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.ErrorResponse(http.StatusBadRequest, "無效的ID格式"))
+		c.JSON(http.StatusBadRequest, utils.ErrorsResponse(http.StatusBadRequest, "無效的ID格式"))
 		return
 	}
 
 	_, err = repositories.GetUserByID(idx)
 	if err != nil {
-		c.JSON(http.StatusNotFound, utils.ErrorResponse(http.StatusNotFound, "用戶不存在"))
+		c.JSON(http.StatusNotFound, utils.ErrorsResponse(http.StatusNotFound, "用戶不存在"))
 		return
 	}
 
 	if err := repositories.DeleteUser(idx); err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(http.StatusInternalServerError, "無法刪除用戶"))
+		c.JSON(http.StatusInternalServerError, utils.ErrorsResponse(http.StatusInternalServerError, "無法刪除用戶"))
 		return
 	}
 

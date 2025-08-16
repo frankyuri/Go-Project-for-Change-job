@@ -23,15 +23,15 @@ func CreateProduct(c *gin.Context) {
 	}
 	_, exists = c.Get("username")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, utils.ErrorResponse(http.StatusUnauthorized, "無法取得用戶資訊"))
+		c.JSON(http.StatusUnauthorized, utils.ErrorsResponse(http.StatusUnauthorized, "無法取得用戶資訊"))
 		return
 	}
 	if err := c.ShouldBindJSON(&product); err != nil {
-		c.JSON(http.StatusBadRequest, utils.ErrorResponse(http.StatusBadRequest, "無效的請求數據: "+err.Error()))
+		c.JSON(http.StatusBadRequest, utils.ErrorsResponse(http.StatusBadRequest, "無效的請求數據: "+err.Error()))
 		return
 	}
 	if err := repositories.CreateProduct(&product); err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(http.StatusInternalServerError, "創建商品失敗: "+err.Error()))
+		c.JSON(http.StatusInternalServerError, utils.ErrorsResponse(http.StatusInternalServerError, "創建商品失敗: "+err.Error()))
 		utils.WriteOperationLogFromContext(c, "create_product", fmt.Sprintf("%d", product.ID), "", "", "fail", "API", "Product", time.Since(start).Milliseconds())
 		return
 	}
@@ -50,11 +50,11 @@ func GetProducts(c *gin.Context) {
 	}
 	_, exists = c.Get("username")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, utils.ErrorResponse(http.StatusUnauthorized, "無法取得用戶資訊"))
+		c.JSON(http.StatusUnauthorized, utils.ErrorsResponse(http.StatusUnauthorized, "無法取得用戶資訊"))
 		return
 	}
 	if err := repositories.GetProducts(&products); err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(http.StatusInternalServerError, "查詢商品失敗: "+err.Error()))
+		c.JSON(http.StatusInternalServerError, utils.ErrorsResponse(http.StatusInternalServerError, "查詢商品失敗: "+err.Error()))
 		return
 	}
 	c.JSON(http.StatusOK, utils.SuccessResponse(http.StatusOK, "查詢成功", products))
@@ -71,11 +71,11 @@ func GetProductByID(c *gin.Context) {
 	}
 	_, exists = c.Get("username")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, utils.ErrorResponse(http.StatusUnauthorized, "無法取得用戶資訊"))
+		c.JSON(http.StatusUnauthorized, utils.ErrorsResponse(http.StatusUnauthorized, "無法取得用戶資訊"))
 		return
 	}
 	if err := repositories.GetProductByID(id, &product); err != nil {
-		c.JSON(http.StatusNotFound, utils.ErrorResponse(http.StatusNotFound, "找不到商品"))
+		c.JSON(http.StatusNotFound, utils.ErrorsResponse(http.StatusNotFound, "找不到商品"))
 		return
 	}
 	c.JSON(http.StatusOK, utils.SuccessResponse(http.StatusOK, "查詢成功", product))
@@ -91,11 +91,11 @@ func UpdateProduct(c *gin.Context) {
 		return
 	}
 	if err := repositories.GetProductByID(id, &product); err != nil {
-		c.JSON(http.StatusNotFound, utils.ErrorResponse(http.StatusNotFound, "找不到商品"))
+		c.JSON(http.StatusNotFound, utils.ErrorsResponse(http.StatusNotFound, "找不到商品"))
 		return
 	}
 	if err := c.ShouldBindJSON(&product); err != nil {
-		c.JSON(http.StatusBadRequest, utils.ErrorResponse(http.StatusBadRequest, "無效的請求數據: "+err.Error()))
+		c.JSON(http.StatusBadRequest, utils.ErrorsResponse(http.StatusBadRequest, "無效的請求數據: "+err.Error()))
 		return
 	}
 	var input models.Product
@@ -107,7 +107,7 @@ func UpdateProduct(c *gin.Context) {
 	product.ImageURL = input.ImageURL
 	product.Status = input.Status
 	if err := repositories.UpdateProduct(&product); err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(http.StatusInternalServerError, "更新商品失敗: "+err.Error()))
+		c.JSON(http.StatusInternalServerError, utils.ErrorsResponse(http.StatusInternalServerError, "更新商品失敗: "+err.Error()))
 		return
 	}
 	c.JSON(http.StatusOK, utils.SuccessResponse(http.StatusOK, "更新成功", product))
@@ -123,11 +123,11 @@ func DeleteProduct(c *gin.Context) {
 	}
 	_, exists = c.Get("username")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, utils.ErrorResponse(http.StatusUnauthorized, "無法取得用戶資訊"))
+		c.JSON(http.StatusUnauthorized, utils.ErrorsResponse(http.StatusUnauthorized, "無法取得用戶資訊"))
 		return
 	}
 	if err := repositories.DeleteProduct(id); err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse(http.StatusInternalServerError, "刪除商品失敗: "+err.Error()))
+		c.JSON(http.StatusInternalServerError, utils.ErrorsResponse(http.StatusInternalServerError, "刪除商品失敗: "+err.Error()))
 		return
 	}
 	c.JSON(http.StatusOK, utils.SuccessResponse(http.StatusOK, "刪除成功", nil))

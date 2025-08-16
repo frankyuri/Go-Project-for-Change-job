@@ -23,8 +23,8 @@ func TestSuccessResponse(t *testing.T) {
 	}
 }
 
-func TestErrorResponse(t *testing.T) {
-	resp := ErrorResponse(400, "something wrong")
+func TestErrorsResponse(t *testing.T) {
+	resp := ErrorsResponse(400, "something wrong")
 
 	if resp.Status != 400 {
 		t.Errorf("預期 Status 400，實際為 %d", resp.Status)
@@ -32,10 +32,5 @@ func TestErrorResponse(t *testing.T) {
 	if resp.Error != "something wrong" {
 		t.Errorf("預期 Error 'something wrong'，實際為 %s", resp.Error)
 	}
-	if resp.Message != "" {
-		t.Errorf("預期 Message 為空字串，實際為 %s", resp.Message)
-	}
-	if resp.Data != nil {
-		t.Errorf("預期 Data 為 nil，實際為 %v", resp.Data)
-	}
+	// ErrorResponse does not have a Data field, so no Data check is needed here.
 }

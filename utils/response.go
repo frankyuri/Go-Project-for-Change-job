@@ -8,6 +8,11 @@ type Response struct {
 	Error   string      `json:"error,omitempty"`
 }
 
+type ErrorResponse struct {
+	Status int    `json:"status"`
+	Error  string `json:"error"`
+}
+
 func SuccessResponse(status int, message string, data interface{}) Response {
 	return Response{
 		Status:  status,
@@ -16,8 +21,8 @@ func SuccessResponse(status int, message string, data interface{}) Response {
 	}
 }
 
-func ErrorResponse(status int, error string) Response {
-	return Response{
+func ErrorsResponse(status int, error string) ErrorResponse {
+	return ErrorResponse{
 		Status: status,
 		Error:  error,
 	}

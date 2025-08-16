@@ -3,11 +3,15 @@ package main
 import (
 	"context"
 	"go-train/database"
+	_ "go-train/docs" // 這行很重要，確保 docs 包被正確導入
 	"go-train/middleware"
 	"go-train/routes"
 	"go-train/utils"
 	"log"
 	"os"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -15,6 +19,11 @@ import (
 	"golang.ngrok.com/ngrok/config"
 )
 
+// @title           你的API名稱
+// @version         1.0
+// @description     API 說明
+// @host            localhost:3030
+// @BasePath        /
 func main() {
 	// 讀取env
 	if err := godotenv.Load("./config/.env"); err != nil {
@@ -31,7 +40,8 @@ func main() {
 	utils.InitRedis()
 	// 信任代理，讓 Gin 正確處理 X-Forwarded-* headers
 	r.SetTrustedProxies([]string{"0.0.0.0/0"})
-
+	// Swagger 文檔
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	// 加入 CORS 中間件
 	r.Use(func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")

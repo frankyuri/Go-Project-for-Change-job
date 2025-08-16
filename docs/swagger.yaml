@@ -1,0 +1,67 @@
+basePath: /
+definitions:
+  dto.UserRegisterResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      username:
+        type: string
+    type: object
+  models.User:
+    type: object
+  utils.ErrorResponse:
+    properties:
+      error:
+        type: string
+      status:
+        type: integer
+    type: object
+host: localhost:3030
+info:
+  contact: {}
+  description: API 說明
+  title: 你的API名稱
+  version: "1.0"
+paths:
+  /api/v1/users/register:
+    post:
+      consumes:
+      - application/json
+      description: 用戶註冊
+      parameters:
+      - description: 用戶信息
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 註冊成功
+          schema:
+            $ref: '#/definitions/dto.UserRegisterResponse'
+        "400":
+          description: 無效的請求數據
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "409":
+          description: 用戶名或郵箱已被使用
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: 註冊失敗
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth: []
+      - BasicAuth: []
+      - OAuth2: []
+      summary: 用戶註冊
+      tags:
+      - User
+swagger: "2.0"
