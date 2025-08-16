@@ -19,7 +19,7 @@ import (
 	"golang.ngrok.com/ngrok/config"
 )
 
-// @title           你的API名稱
+// @title           go-side-project API
 // @version         1.0
 // @description     API 說明
 // @host            localhost:3030
